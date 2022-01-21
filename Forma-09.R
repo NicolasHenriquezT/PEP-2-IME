@@ -1,6 +1,7 @@
 library(dplyr)
 library(ggpubr)
 library(ez)
+library(tidyverse)
 
 # Pregunta 1
 
@@ -12,10 +13,10 @@ library(ez)
 # Se leen los datos del excel.
 datos <- read.csv2(file.choose(),header=TRUE, sep = ";")
 
-# Se filtra segun la division.
+# Se filtra según la división.
 datos <- datos%>%filter(division == "Sandtrooper")
 
-# Se filtra segun los distintos oficiales evaluadores.
+# Se filtra según los distintos oficiales evaluadores.
 evaluaciones <- datos%>%select(eval_instructor, eval_capitan, eval_comandante, eval_general)
 
 # Se generan las instancias para agregarlas al dataframe de evaluaciones. 
@@ -27,30 +28,30 @@ evaluaciones <- cbind(instancia, evaluaciones)
 # Hipótesis:
 
 # Hipótesis Nula (H0)
-# H0: No existen diferencias significativas en el promedio de la evaluacion realizada por cada uno de los oficiales.
+# H0: No existen diferencias significativas en el promedio de la evaluación realizada por cada uno de los oficiales.
 
 # Hipótesis alternativa (HA)
-# HA: Existen diferencias significativas en el promedio de la evaluacion realizada por cada uno de los oficiales.
+# HA: Existen diferencias significativas en el promedio de la evaluación realizada por cada uno de los oficiales.
 
-# Se transformar los datos del dataframe a numericos
+# Se transforman los datos del dataframe a numéricos.
 evaluaciones <- as.data.frame(apply(evaluaciones, 2, as.numeric))
 
-# Se verifica la correlacion de los datos para escoger la prueba de hipotesis a utilizar.
+# Se verifica la correlación de los datos para escoger la prueba de hipótesis a utilizar.
 cor(evaluaciones)
-# Se observa que todos los datos son muy bajos, por lo que no estan correlacionados, debido a esto
-# se utilizara el ANOVA para muestras independientes.
+# Se observa que todos los datos son muy bajos, por lo que no están correlacionados, debido a esto
+# se utilizará el ANOVA para muestras independientes.
 
 # Condiciones para utilizar ANOVA para muestras independientes.
 # 1. La escala con que se mide la variable dependiente tiene las propiedades de una escala de intervalos iguales.
-# Respuesta: Esta condicion se verifica, ya que todos los valores observados se encuentran en una escala de 
+# Respuesta: Esta condición se verifica, ya que todos los valores observados se encuentran en una escala de 
 #            intervalos iguales.
 
 # 2. Las k muestras son obtenidas de manera aleatoria e independiente desde la(s) población(es) de origen.
-# Respuesta: Se puede suponer segun el enunciado que se verifica esta condicion.
+# Respuesta: Se puede suponer según el enunciado que se verifica esta condición.
 
 # 3. Se puede suponer razonablemente que la(s) población(es) de origen sigue(n) una distribución normal.
 
-# Se tranforma el dataframe a formato largo.
+# Se transforma el dataframe a formato largo.
 evaluaciones <- evaluaciones %>% pivot_longer(c("eval_instructor", "eval_capitan", "eval_comandante", "eval_general"),
                                 names_to = "evaluadores", values_to = "evaluacion")
 
@@ -62,12 +63,12 @@ g <- g + rremove("y.ticks") + rremove("y.text")
 g <- g + rremove("axis.title")
 print(g)
 
-# Respuesta: Se puede observar en el grafico Q-Q que no existen valores atipicos, por lo que se cumple esta condicion.
-#            Debido a esto se utilizara un nivel de significancia estandar (α = 0.05). 
+# Respuesta: Se puede observar en el gráfico Q-Q que no existen valores atípicos, por lo que se cumple esta condición.
+#            Debido a esto se utilizará un nivel de significancia estándar (α = 0.05). 
 
 # 4. Las k muestras tienen varianzas aproximadamente iguales.
-# Respuesta: Esta condicion se verificara mas adelante con la prueba ezANOVA(), ya que esta realiza la 
-#            prueba de homocedasticidad de Levene
+# Respuesta: Esta condición se verificará más adelante con la prueba ezANOVA(), ya que esta realiza la 
+#            prueba de homocedasticidad de Levene.
 
 # Se define el nivel de significancia.
 alfa <- 0.05
@@ -77,32 +78,63 @@ prueba <- ezANOVA(data = evaluaciones, dv = evaluacion, between = evaluadores,
                    wid = instancia, return_aov = TRUE)
 print(prueba)
 
-# La hipotesis nula de la prueba de Levene corresponde a que las varianzas de las k muestras son iguales.
+# La hipótesis nula de la prueba de Levene corresponde a que las varianzas de las k muestras son iguales.
 # Como se obtuvo un p valor de 0.77 superior al nivel de significancia establecido, se acepta la h0, por lo 
-# que podemos afirmar que se verifica la cuerta condicion para utilizar el procedemiento de ANOVA.
+# que podemos afirmar que se verifica la cuarta condición para utilizar el procedimiento de ANOVA.
 
-# Se realiza un grafico del tamaño del efecto.
+# Se realiza un gráfico del tamaño del efecto.
 g2 <- ezPlot(data = evaluaciones, dv = evaluacion, wid = instancia, between = evaluadores,
              y_lab = "Evaluacion promedio", x = evaluadores)
 print(g2)
 
-# Conclusion:
-# El valor p obtenido p = 5.598888e-45 es inferior a nuestro nivel de significacion establecido α = 0.05, debido
-# a esto rechazamos la hipotesis nula en favor de la hipotesis alternativa. Podemos concluir con un 95% de confianza
-# que existen diferencias significativas en el promedio de la evaluacion realizada por cada uno de los oficiales. 
-# Esto tambien se puede verificar en el grafico del tamaño del efecto realizado.
+# Conclusión:
+# El valor p obtenido p = 5.598888e-45 es inferior a nuestro nivel de significación establecido α = 0.05, debido
+# a esto rechazamos la hipótesis nula en favor de la hipótesis alternativa. Podemos concluir con un 95% de confianza
+# que existen diferencias significativas en el promedio de la evaluación realizada por cada uno de los oficiales. 
+# Esto también se puede verificar en el gráfico del tamaño del efecto realizado.
+
+# Se procede a realizar el procedimiento Post-Hoc para comparar los resultados obtenidos con la prueba de ANOVA. Esto
+# debido a que obtuvimos diferencias significativas en el promedio de la evaluación realizada por cada uno de los oficiales,
+# pero necesitamos identificar a aquellos oficiales que presentan diferencias en sus evaluaciones.
+
+# Procedimiento post-hoc de Holm.
+holm <- pairwise.t.test(evaluaciones[["evaluacion"]], 
+                        evaluaciones[["evaluadores"]],
+                        p.adj = "holm", 
+                        pool.sd = TRUE, 
+                        paired = FALSE, 
+                        conf.level = 1 - alfa)
+
+cat("\n\nCorrecion de Holm\n")
+print(holm)
+
+# Procedimiento ANOVA.
+anova <- aov(evaluacion ~ evaluadores, data = evaluaciones)
+
+
+# Procedimiento post-hoc HSD de Tukey.
+post_hoc <- TukeyHSD(anova,
+                     "evaluadores",
+                     ordered = TRUE,
+                     conf.level = 1 - alfa)
+print(post_hoc)
+
+# A través de los procedimientos post-hoc realizados se puede observar que los valores p inferiores a nuestro
+# alfa (α = 0.05) corresponden a eval_comandante-eval_capitán, eval_instructor-eval_capitán y eval_general-eval_capitán.
+# Los cuales también presentan una diferencia significativa, esto coincide con el análisis post-hoc de holm y con el gráfico
+# del tamaño del efecto realizado. Finalmente, para el reporte solicitado por Lord Sith podemos concluir con 95% de confianza 
+# que las evaluaciones del capitán respecto al comandante, general e instructor presentan diferencias significativas en el promedio 
+# de la evaluación realizada.
+
+################################################################################################################################
+################################################################################################################################
+################################################################################################################################
+
+# Pregunta 2:
 
 
 
-
-
-
-
-
-
-
-
-
+ 
 
 
 
