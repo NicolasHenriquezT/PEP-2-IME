@@ -149,7 +149,7 @@ n <- 400
 set.seed(3488)
 datos <- sample_n(datos, size = n)
 
-# Se cambia es_Clon para que sea una variable categorica numerica.
+# Se cambia es_Clon para que sea una variable categórica numérica.
 datos$es_clon <- ifelse(datos$es_clon == "S", 1, 0)
 
 # Se obtienen los nombres de las variables del dataframe.
@@ -175,45 +175,24 @@ print(summary(modelo1))
 modelo2 <- glm(es_clon ~ agilidad + peso, family = binomial(link = "logit"), data = entrenamiento)
 print(summary(modelo2))
 
-# Se calcula el AIC1 (modelo1) y AIC2 (modelo2) para hacer la comparacion con ANOVA.
+# Se calcula el AIC1 (modelo1) y AIC2 (modelo2) para hacer la comparación con ANOVA.
 AIC1 <- AIC(modelo1)
 AIC2 <- AIC(modelo2)
 
-# Se realiza la comparacion de los modelos con ANOVA.
+# Se realiza la comparación de los modelos con ANOVA.
 comparacion <- anova (modelo1, modelo2, test = "LRT")
 print(comparacion)
 
-# Se utilizara un nivel de significancia de 0.05 para analizar los modelos.
-# Se observa que el AIC 
+# Se utilizará un nivel de significancia de 0.05 para analizar los modelos.
+# Se observa que el AIC del modelo 1 es menor que el del modelo 2. Al realizar la comparación con ANOVa para
+# el modelo 2 obtenemos un p = 0.3213, el cual es mayor a nuestro nivel de significancia, por lo que podemos
+# concluir con 95% de confianza que el modelo1 es mejor que el modelo2.
 
+# Utilizando el mejor modelo posible se debería determinar si es necesario un entrenamiento especial para clones o
+# reclutas utilizando las variables predictoras.
 
-
-# Se tiene que el AIC del modelo 2 es menor que el del modelo 1. al evaluar las 
-# diferencias significativas con ANOVA, se obtiene un p = 1.722e-13, inferior a 
-# 0.05, por lo que se concluye con un 95% de confianza, que el modelo2 es mejor 
-# que el modelo1.
-
-
-
-
-
-
-
-
-
-#muestra de 400 datos , 80% entrenamiento y 20% prueba
-
-
-#semilla, separación entre conjuntos de entrenamiento y prueba, etc.)
 
  
-
-
-
-
-
-
-
 
 ################################################################################################################################
 ################################################################################################################################
