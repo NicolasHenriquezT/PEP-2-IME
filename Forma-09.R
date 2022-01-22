@@ -132,10 +132,86 @@ print(post_hoc)
 
 # Pregunta 2:
 
+# Se leen los datos del excel.
+datos <- read.csv2(file.choose(),header=TRUE, sep = ";")
 
+# Se establece la semilla.
+set.seed(3488)
+
+# Se obtienen los nombres de las variables del dataframe.
+nombresVariables <- colnames(datos)
+
+# Se seleccionan al azar 3 variables predictoras.
+set.seed(3488)
+variablesPredictoras <- sample(nombresVariables, size = 3)
+
+# Tamaño de la muestra.
+n <- 400
+
+# Se obtiene la muestra de 400 datos.
+set.seed(3488)
+datos <- sample_n(datos, size = n)
+
+# Se obtiene el 80% de los datos para entrenamiento.
+entrenamiento <- floor(0.8 * n)
+muestra <- sample.int(n = n , size = entrenamiento, replace = FALSE)
+entrenamiento <- datos[muestra, ]
+
+# Se obtiene el 20% de los datos para prueba. Esto corresponde a lo que resta de los datos de entrenamiento.
+prueba <- datos[-muestra, ]
+
+
+
+
+
+
+
+
+
+#muestra de 400 datos , 80% entrenamiento y 20% prueba
+
+
+#semilla, separación entre conjuntos de entrenamiento y prueba, etc.)
 
  
 
 
+
+
+
+
+
+
+################################################################################################################################
+################################################################################################################################
+################################################################################################################################
+
+# Pregunta 3:
+
+# Proponga un ejemplo novedoso (no mencionado en clase ni que aparezca en las lecturas dadas) en 
+# donde un estudio o experimento, relacionado con las expectativas de los chilenos para el nuevo 
+# gobierno, necesite utilizar una prueba de Kruskal-Wallis debido a problemas con la escala de la 
+# variable dependiente en estudio. Indiqué cuáles serían las variables involucradas en su 
+# ejemplo (con sus respectivos niveles) y las hipótesis nula y alternativa a contrastar.
+
+
+# Respuesta:
+# Para este problema se indica que debe existir un problema con la variable dependiente del estudio
+# Puntualmente que la escala con que se mide la variable dependiente, es en intervalos desiguales.
+# Aunque sean en intervalos desiguales esta debe ser a lo menos ordinal, de esta forma se plantea
+# Que los chilenos evalúen a base de sus expectativas el próximo gobierno utilizando distintas escalas
+# para distintos rangos etarios, siendo por ejemplo
+# De 10 a 30 años se utilice una escala de 1 a 7
+# De 31 a 50 años se utilice una escala de 1 a 5
+# De 51 a 70 años se utilice una escala de 1 a 20
+# finalmente de 70 años para arriba utilizarán una escala de 1 a 10
+# Como supuesto se tendrá que entre mayor el valor es una mejor expectativa sobre el nuevo gobierno
+# Para este estudie se buscará si existe un rango etario que difiere en puntuación promedio
+
+# Hipótesis nula:
+# Todos los rangos etarios asignaron una puntuación promedio similar.
+
+# Hipótesis alternativa:
+# Al menos un rango etario asigno una puntuación promedio distinta.
 
 
