@@ -2,6 +2,10 @@ library(dplyr)
 library(ggpubr)
 library(ez)
 library(tidyverse)
+library(pROC)
+library(caret)
+
+
 
 # Pregunta 1
 
@@ -138,19 +142,22 @@ datos <- read.csv2(file.choose(),header=TRUE, sep = ";")
 # Se establece la semilla.
 set.seed(3488)
 
-# Se obtienen los nombres de las variables del dataframe.
-nombresVariables <- colnames(datos)
-
-# Se seleccionan al azar 3 variables predictoras.
-set.seed(3488)
-variablesPredictoras <- sample(nombresVariables, size = 3)
-
 # Tamaño de la muestra.
 n <- 400
 
 # Se obtiene la muestra de 400 datos.
 set.seed(3488)
 datos <- sample_n(datos, size = n)
+
+# Se cambia es_Clon para que sea una variable categorica numerica.
+datos$es_clon <- ifelse(datos$es_clon == "S", 1, 0)
+
+# Se obtienen los nombres de las variables del dataframe.
+nombresVariables <- colnames(datos[3:16])
+
+# Se seleccionan al azar 3 variables predictoras.
+set.seed(3488)
+variablesPredictoras <- sample(nombresVariables, size = 3)
 
 # Se obtiene el 80% de los datos para entrenamiento.
 entrenamiento <- floor(0.8 * n)
@@ -159,6 +166,32 @@ entrenamiento <- datos[muestra, ]
 
 # Se obtiene el 20% de los datos para prueba. Esto corresponde a lo que resta de los datos de entrenamiento.
 prueba <- datos[-muestra, ]
+
+# Se ajusta el modelo con la primer variable predictora "agilidad".
+modelo1 <- glm(es_clon ~ agilidad, family = binomial(link = "logit"), data = entrenamiento)
+print(summary(modelo1))
+
+# Se ajusta el modelo con la segunda variable predictora "peso".
+modelo2 <- glm(es_clon ~ agilidad + peso, family = binomial(link = "logit"), data = entrenamiento)
+print(summary(modelo2))
+
+# Se calcula el AIC1 (modelo1) y AIC2 (modelo2) para hacer la comparacion con ANOVA.
+AIC1 <- AIC(modelo1)
+AIC2 <- AIC(modelo2)
+
+# Se realiza la comparacion de los modelos con ANOVA.
+comparacion <- anova (modelo1, modelo2, test = "LRT")
+print(comparacion)
+
+# Se utilizara un nivel de significancia de 0.05 para analizar los modelos.
+# Se observa que el AIC 
+
+
+
+# Se tiene que el AIC del modelo 2 es menor que el del modelo 1. al evaluar las 
+# diferencias significativas con ANOVA, se obtiene un p = 1.722e-13, inferior a 
+# 0.05, por lo que se concluye con un 95% de confianza, que el modelo2 es mejor 
+# que el modelo1.
 
 
 
